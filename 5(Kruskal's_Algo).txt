@@ -1,0 +1,79 @@
+# --------------- Kruskal's Algorithm ---------------
+def kruskal(n, edges, names):
+    # Sort edges by weight
+    edges.sort(key=lambda x: x[2])
+    parent = list(range(n))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]  # Path compression
+            i = parent[i]
+        return i
+
+    mst = []
+    total_cost = 0
+    for u, v, w in edges:
+        pu, pv = find(u), find(v)
+        if pu != pv:
+            mst.append((u, v, w))
+            total_cost += w
+            parent[pu] = pv  # Union
+
+    print("\nMST using Kruskal's Algorithm:")
+    for u, v, w in mst:
+        print(f"{names[u]} -- {names[v]} == {w}")
+    print("Total Cost of MST =", total_cost)
+
+# --------------- Prim's Algorithm ---------------
+def prim(n, adj, names):
+    selected = [False]*n
+    selected[0] = True  # Start from node 0
+    mst = []
+    total_cost = 0
+    for _ in range(n-1):
+        u = v = -1
+        min_w = float('inf')
+        for i in range(n):
+            if selected[i]:
+                for j in range(n):
+                    if not selected[j] and adj[i][j] > 0:
+                        if adj[i][j] < min_w:
+                            u, v, min_w = i, j, adj[i][j]
+        if v == -1:
+            break  # Disconnected graph case
+        mst.append((u, v, min_w))
+        total_cost += min_w
+        selected[v] = True
+
+    print("\nMST using Prim's Algorithm:")
+    for u, v, w in mst:
+        print(f"{names[u]} -- {names[v]} == {w}")
+    print("Total Cost of MST =", total_cost)
+
+# --------------- Main Program ---------------
+if __name__ == "__main__":
+    n = int(input("Enter number of departments: "))
+    names = []
+    print("\n----------- Enter department names -----------")
+    for i in range(n):
+        names.append(input(f"Department {i+1} Name: "))
+
+    edges = []
+    m = int(input("\nEnter number of paths (edges): "))
+    print("\n----------- Enter edges -----------")
+    for _ in range(m):
+        dept1 = input("Dept1_Name= ")
+        dept2 = input("Dept2_Name= ")
+        w = int(input("Distance= "))
+        u = names.index(dept1)
+        v = names.index(dept2)
+        edges.append((u, v, w))
+
+    # Adjacency matrix
+    adj = [[0]*n for _ in range(n)]
+    for u, v, w in edges:
+        adj[u][v] = adj[v][u] = w
+
+    # Run algorithms
+    kruskal(n, edges[:], names)  # Pass a copy so sorting does not affect other input
+    prim(n, adj, names)
